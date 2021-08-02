@@ -1,0 +1,20 @@
+Doubts:
+Report Properties:
+General:
+1.Enterprise Scheduler Job Package Name	
+
+2.Enterprise Scheduler Job Definition Name
+
+Formatting:
+*PDF OUTPUT:
+1.Disable adding or changing comments and form fields.
+2.Enable text access for screen readers.
+3.Use only one shared resources object for all pages
+*PDF/A OUTPUT:
+*PDF/X OUTPUT:
+*DOCX OUTPUT /RTF OUTPUT:
+1.Enable change tracking.
+2.Protect document for tracked changes.
+*FO PROCESSING:
+*RTF TEMPLATE
+1.Characters used for checkbox.
