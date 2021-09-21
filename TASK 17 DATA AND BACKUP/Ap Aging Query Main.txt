@@ -1,0 +1,644 @@
+Select BUSINESS_UNIT
+, Sum(Prepayments) as Prepayments
+, Sum(Retention_Amount) as Retention_Amount
+, Sum(FULL_INVOICE_AMOUNT) as FULL_INVOICE_AMOUNT
+, Sum(FULL_INVOICE_AMOUNT_USD) as FULL_INVOICE_AMOUNT_USD
+, Sum(REMAINING_AMOUNT) as REMAINING_AMOUNT
+, Sum(REMAINING_AMOUNT_USD) as REMAINING_AMOUNT_USD
+, Sum("CURRENT") as  "CURRENT"
+,Sum("1_30_Days") as "1_30_Days"
+,Sum("31_60_Days")as "31_60_Days"
+,Sum("61_90_Days") as "61_90_Days"
+,Sum(Morethan90_Days) as Morethan90_Days
+,:P_Legal_Entity as Legal_Entity_Name
+
+,(Select Distinct GL.Currency_Code From Ap_Invoices_All AP,XLE_ENTITY_PROFILES LE,GL_Ledgers GL
+  Where AP.Legal_Entity_ID=LE.Legal_Entity_ID And AP.Set_Of_Books_Id=GL.Ledger_Id
+  And LE.Name= :P_Legal_Entity And Rownum=1) as Funtional_Currency
+
+From (
+
+Select BUSINESS_UNIT,Liability_Acct,GRP_Acct ,Company_Acct,SEG_Company,SEG_Account,SEG_Trading_Company,Segment1 ,Segment2,Segment5
+,Sum(Accounted) as Accounted
+,Sum(Accounted_FUN) as Accounted_FUN
+
+, SUPPLIER_NAME
+, Invoice_Currency_Code
+, SUPPLIER_NUMBER
+, SUPPLIER_TYPE
+, INVOICE_NUM
+, POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE
+, Sum(Prepayments) as Prepayments 
+, Payment_Term
+, Inv_Description
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(Retention_Amount) Else 0 End) as Retention_Amount  
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(INVOICE_PAYMENT_TOTAL) Else 0 End) as INVOICE_PAYMENT_TOTAL
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(FULL_INVOICE_AMOUNT) Else 0 End) as FULL_INVOICE_AMOUNT
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(REMAINING_AMOUNT) Else 0 End) as REMAINING_AMOUNT
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(INVOICE_PAYMENT_TOTAL_USD) Else 0 End) as INVOICE_PAYMENT_TOTAL_USD
+, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME,Segment1)=1 Then 
+    Sum(FULL_INVOICE_AMOUNT_USD) Else 0 End) as FULL_INVOICE_AMOUNT_USD
+/*, (Case When  row_number() over(partition by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME  order by BUSINESS_UNIT,INVOICE_NUM,SUPPLIER_NAME)=1 Then 
+    Sum(REMAINING_AMOUNT_USD)  Else 0 End) as REMAINING_AMOUNT_USD*/
+, Sum(REMAINING_AMOUNT_USD) as REMAINING_AMOUNT_USD
+
+,Sum("CURRENT") as  "CURRENT"
+,Sum("1_30_Days") as "1_30_Days"
+,Sum("31_60_Days")as "31_60_Days"
+,Sum("61_90_Days") as "61_90_Days"
+,Sum(Morethan90_Days) as Morethan90_Days
+
+From (
+
+Select  BUSINESS_UNIT,
+Segment2 as Liability_Acct,
+Segment1||' '||Segment2||' '||Segment5 as GRP_Acct,
+
+'Company'||': '||Segment1||'  Liability'||': '||Segment2||'  Trading Company'||': '||Segment5||'' as Company_Acct, 
+(Select segment_name||'              :  '||fv.flex_value||'   '||fv.description 
+from
+fnd_flex_values_vl fv, 
+fnd_id_flex_segments fs
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Company Property'
+And fv.flex_value=Segment1) as SEG_Company,
+(Select segment_name||'              :  '||fv.flex_value||'   '||fv.description 
+from
+fnd_flex_values_vl fv, fnd_id_flex_segments fs
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Account'
+And fv.flex_value=Segment2) as SEG_Account,
+(Select segment_name||'              :  '||fv.flex_value||'   '||fv.description 
+from
+fnd_flex_values_vl fv, fnd_id_flex_segments fs
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Trading Company Property'
+And fv.flex_value=Segment5) as SEG_Trading_Company
+,Segment1 
+,Segment2
+,Segment5
+,Sum(Accounted) as Accounted
+,Sum(Accounted_FUN) as Accounted_FUN, 
+
+--------------Detail2 Sum Start
+
+ SUPPLIER_NAME,
+ Invoice_Currency_Code,
+ SUPPLIER_NUMBER,
+ SUPPLIER_TYPE,
+ INVOICE_NUM,
+ Sum(Pre_payment) as Prepayments,
+ Payment_Term,
+ Description as Inv_Description,
+Sum(Retention_Amount) as Retention_Amount  ,
+
+ Sum(INVOICE_PAYMENT_TOTAL) as INVOICE_PAYMENT_TOTAL,
+ Sum(FULL_INVOICE_AMOUNT) as FULL_INVOICE_AMOUNT_USD,--FULL_INVOICE_AMOUNT
+ 
+ (Case When :P_Aging_Type='Revaluation' And Nvl(Exchange_Rate_TPE,0) !=0 Then  
+Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0) Else 
+ 
+ /*Sum(REMAINING_AMOUNT)*/ Sum(Accounted) End) as REMAINING_AMOUNT_USD,--REMAINING_AMOUNT
+ 
+Sum(INVOICE_PAYMENT_TOTAL_USD) as INVOICE_PAYMENT_TOTAL_USD,
+Sum(FULL_INVOICE_AMOUNT_USD) as FULL_INVOICE_AMOUNT,--FULL_INVOICE_AMOUNT_USD
+ 
+ 
+ /*Sum(REMAINING_AMOUNT_USD)*/ Sum(Accounted_FUN) as REMAINING_AMOUNT--REMAINING_AMOUNT_USD
+
+, (Case When :P_Aging_Type='Revaluation' And Sum(CUR_DAY) !=0 And Nvl(Exchange_Rate_TPE,0) !=0 Then Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0) Else Sum(CUR_DAY) End) as  "CURRENT"
+, (Case When :P_Aging_Type='Revaluation' And Sum(Bt_1) !=0 And Nvl(Exchange_Rate_TPE,0) !=0 Then Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0) Else Sum(Bt_1) End) as "1_30_Days"
+, (Case When :P_Aging_Type='Revaluation' And Sum(Bt_2) !=0 And Nvl(Exchange_Rate_TPE,0) !=0 Then Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0) Else Sum(Bt_2) End)as "31_60_Days"
+, (Case When :P_Aging_Type='Revaluation' And Sum(Bt_3) !=0 And Nvl(Exchange_Rate_TPE,0) !=0 Then Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0) Else Sum(Bt_3) End) as "61_90_Days"
+, (Case When :P_Aging_Type='Revaluation' And Sum(Bt_4) !=0 And Nvl(Exchange_Rate_TPE,0) !=0 Then Sum(Nvl(REMAINING_AMOUNT_USD,0))*Nvl(Exchange_Rate_TPE,0)  Else Sum(Bt_4) End) as Morethan90_Days
+,POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,Exchange_Rate_TPE,Exchange_Rate_TC
+
+--------------Detail2 Sum End
+From (
+
+Select Segment1 ,Segment2,Segment4,Segment5,Invoice_Num
+,Sum(Accounted_DR) as Accounted_DR,Sum(Accounted_CR)as Accounted_CR
+,(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End) as Accounted 
+
+
+,(Case When Sum(Entered_CR)>Sum(Entered_DR) And Sum(Entered_DR) !=0 And Sum(Entered_CR) !=0 Then 
+Sum(Entered_CR)-Sum(Entered_DR) 
+When Sum(Entered_DR)>Sum(Entered_CR)  And Sum(Entered_DR) !=0 And Sum(Entered_CR) !=0  Then
+Sum(Entered_DR)-Sum(Entered_CR) 
+When Sum(Entered_CR)=0 And Sum(Entered_DR)>0  Then
+Sum(Entered_CR)-Sum(Entered_DR)
+When Sum(Entered_DR)=0 And Sum(Entered_CR)>0  Then
+Sum(Entered_CR)
+Else 0 End) as Accounted_FUN, 
+
+--------------Detail Sum Start
+BUSINESS_UNIT
+, SUPPLIER_NAME
+,SUPPLIER_NUMBER
+,SUPPLIER_TYPE
+,Sum(INVOICE_PAYMENT_TOTAL) as INVOICE_PAYMENT_TOTAL
+,Sum(FULL_INVOICE_AMOUNT) as FULL_INVOICE_AMOUNT
+,Sum(REMAINING_AMOUNT) as REMAINING_AMOUNT
+,Sum(INVOICE_PAYMENT_TOTAL_USD) as INVOICE_PAYMENT_TOTAL_USD
+,Sum(FULL_INVOICE_AMOUNT_USD) as FULL_INVOICE_AMOUNT_USD
+,Sum(REMAINING_AMOUNT_USD) as REMAINING_AMOUNT_USD,
+(Case When CUR_DAY !=0 Then
+
+(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End)
+
+Else 0 End) as CUR_DAY,
+(Case When Bt_1 !=0 Then 
+
+(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End)
+
+Else 0 End) as Bt_1,
+(Case When Bt_2 !=0 Then 
+
+(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End)
+
+Else 0 End) as Bt_2,
+(Case When Bt_3 !=0 Then
+
+(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End)
+
+Else 0 End) as Bt_3,
+(Case When Bt_4 !=0 Then
+
+(Case When Sum(Accounted_CR)>Sum(Accounted_DR) And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0 Then 
+Sum(Accounted_CR)-Sum(Accounted_DR) 
+When Sum(Accounted_DR)>Sum(Accounted_CR)  And Sum(Accounted_DR) !=0 And Sum(Accounted_CR) !=0  Then
+Sum(Accounted_DR)-Sum(Accounted_CR) 
+When Sum(Accounted_CR)=0 And Sum(Accounted_DR)>0  Then
+Sum(Accounted_CR)-Sum(Accounted_DR)
+When Sum(Accounted_DR)=0 And Sum(Accounted_CR)>0  Then
+Sum(Accounted_CR)
+Else 0 End)
+
+Else 0 End) as Bt_4,
+POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE
+,Invoice_Currency_Code,Payment_Term
+,Description
+,Sum(Pre_payment) as Pre_payment
+,Sum(Retention_Amount) as Retention_Amount
+,Exchange_Rate_TPE,Exchange_Rate_TC
+--------------Detail Sum Ends
+
+From(
+
+Select GCC.Segment5,GCC.Segment4,GCC.Segment1 ,GCC.Segment2,XTE.Transaction_Number,AIA.Invoice_Id,AIA.Invoice_Num,XTE.Entity_Code,XTE.Source_Id_Int_1,XTE.Ledger_Id
+,Nvl(XAL.Accounted_DR,0) as Accounted_DR
+, Nvl(XAL.Accounted_CR,0) as Accounted_CR
+,Nvl(XAL.Entered_DR,0) as Entered_DR
+, Nvl(XAL.Entered_CR,0) as Entered_CR
+
+,HAOT.NAME BUSINESS_UNIT
+,NVL(POZ.VENDOR_NAME
+,(SELECT PARTY_NAME FROM HZ_PARTIES HP WHERE HP.PARTY_ID = AIA.PARTY_ID)) AS SUPPLIER_NAME
+,POZ.SEGMENT1 AS SUPPLIER_NUMBER
+,POZ.VENDOR_TYPE_LOOKUP_CODE AS SUPPLIER_TYPE
+
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then AU.PAYMENT_AMOUNT 
+ Else 0 End)AS INVOICE_PAYMENT_TOTAL
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then 
+ (Select Sum(Amount) From AP_INVOICE_PAYMENTS_ALL AIPA 
+ Where APSA.INVOICE_ID=AIPA.INVOICE_ID And APSA.Payment_Num=AIPA.Payment_Num And APSA.org_id=AIPA.org_id And TRUNC(AIPA.ACCOUNTING_DATE) <= '2019-09-30')
+ Else 0 End )   as ARK_INVOICE_PAYMENT_TOTAL
+, (Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT') as WTH_TAX
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1 order by AIA.Invoice_id,GCC.Segment1)=1 
+ Then AU.INVOICE_AMOUNT + Nvl((Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT' ),0) 
+ Else 0 End)AS FULL_INVOICE_AMOUNT
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then
+ AU.INVOICE_VARIANCE 
+ Else 0 End ) 
+ AS REMAINING_AMOUNT
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then ROUND(AU.P_A*NVL(AIA.Exchange_RATE,1),2) 
+ Else 0 End)
+ AS INVOICE_PAYMENT_TOTAL_USD
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1 order by AIA.Invoice_id,GCC.Segment1)=1 
+Then ROUND(AU.I_A,2) + Nvl((Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT' ),0) 
+ Else 0 End)AS FULL_INVOICE_AMOUNT_USD
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then ROUND(AU.I_A,2)  
+ Else 0 End)    AS REMAINING_AMOUNT_USD
+ 
+,  TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) AS DUE_DAYS
+, (Case When  row_number() over(partition by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID order by AIA.Invoice_id,GCC.Segment1,AIA.VENDOR_ID)=1 Then round((AU.I_V/(CASE AU.I_A WHEN 0 THEN 1 ELSE AU.I_A END))*100,2) 
+ Else 0 End)AS PERCENTAGE_UPAID
+,(case when TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) <0 then AU.INVOICE_VARIANCE Else 0 end) CUR_DAY
+,(case when TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) >=0 And  TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') )  <=30 Then AU.INVOICE_VARIANCE Else 0 end) Bt_1
+,(case when TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) >=31 And TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') )  <=60 Then AU.INVOICE_VARIANCE Else 0 end) Bt_2
+,(case when TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) >=61 And TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') )  <=99999 Then AU.INVOICE_VARIANCE Else 0 end) Bt_3
+,(case when TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) >=99999  And TO_DATE(TO_CHAR(:P_AS_OF_DATE,'YYYY-MM-DD')) -   TO_DATE(TO_CHAR(APSA.DUE_DATE,'YYYY-MM-DD') ) <=9999 Then AU.INVOICE_VARIANCE Else 0 end) Bt_4
+
+, CASE AP_INVOICES_PKG.GET_POSTING_STATUS(AIA.INVOICE_ID) WHEN 'Y' THEN 'Posted' WHEN 'P' THEN 'Posted' ELSE 'Not Posted' END AS POSTED_FLAG
+, CASE WHEN (CASE AP_INVOICES_PKG.GET_POSTING_STATUS(AIA.INVOICE_ID) WHEN 'Y' THEN 'Posted' WHEN 'P' THEN 'Posted' ELSE 'Not Posted' END = 'Posted') THEN to_char(AIA.GL_DATE, 'MM-DD-YYYY') ELSE NULL END AS POSTED_DATE
+, TO_CHAR(AIA.INVOICE_DATE, 'MM-DD-YYYY') AS INVOICE_DATE
+, TO_CHAR(AIA.CREATION_DATE, 'MM-DD-YYYY') AS CREATION_DATE  
+, AIA.Invoice_Currency_Code
+, (Select AT.Name From Ap_Terms_TL AT WHere AIA.Terms_Id=AT.Term_id And AT.Language='US' ANd Rownum=1)as Payment_Term
+,AIA.Description
+,(Case When  row_number() over(partition by AIA.Invoice_id order by AIA.Invoice_id)=1 Then
+Nvl((Case When AIA.Invoice_Type_Lookup_Code='PREPAYMENT'   Then  Nvl(AIA.Invoice_Amount,0) Else 0 End),0) 
+ +Nvl((SELECT Abs(Sum(IDA.Amount))  FROM AP_INVOICE_DISTRIBUTIONS_ALL IDA
+WHERE 1=1
+And IDA.LINE_TYPE_LOOKUP_CODE = 'PREPAY' 
+And IDA.Invoice_Id=aia.invoice_id 
+ ),0) Else 0 End) as Pre_payment
+,(Case When  row_number() over(partition by AIA.Invoice_id order by AIA.Invoice_id)=1 Then
+(Select Sum(Amount) From AP_INVOICE_DISTRIBUTIONS_ALL ADA ,GL_Code_Combinations GCC
+Where 1=1
+And GCC.Code_Combination_Id=ADA.Dist_Code_Combination_ID
+And ADA.Invoice_Id=AIA.Invoice_Id 
+And GCC.Segment2='303710') Else 0 End) as Retention_Amount
+,(Select CAST(B.COnversion_Rate as REAL) Exchange_Rate
+From gl_daily_conversion_types A , gl_daily_rates B
+Where A.Conversion_Type=B.Conversion_Type
+And A.User_Conversion_Type='TAL Period End'
+And B.From_Currency=AIA.Invoice_Currency_Code
+And B.TO_Currency=(Select Currency_Code From GL_Ledgers WHere Ledger_Id=AIA.Set_Of_Books_Id)
+And Trunc(Conversion_Date) =   (Case When :P_Revaluation_Period Is Not Null And :P_Aging_Type='Revaluation' 
+                               Then Trunc(Last_Day(ADD_MONTHS(to_date (:P_Revaluation_Period,'MON-RRRR'),0)))
+                               Else LAST_DAY(:P_AS_OF_DATE) End)
+ ) as Exchange_Rate_TPE ,AIA.Exchange_Rate  as Exchange_Rate_TC
+
+
+             FROM    (  SELECT  AP_VARIANCE.INVOICE_ID,
+                                SUM(AP_VARIANCE.PAYMENT_AMOUNT) PAYMENT_AMOUNT,
+		                SUM(AP_VARIANCE.P_A) P_A,
+		                SUM(AP_VARIANCE.INVOICE_AMOUNT) INVOICE_AMOUNT,
+                                SUM(AP_VARIANCE.I_A) I_A,
+                                SUM(AP_VARIANCE.INVOICE_AMOUNT)-SUM(AP_VARIANCE.PAYMENT_AMOUNT) INVOICE_VARIANCE,
+                                SUM(AP_VARIANCE.I_A)-SUM(AP_VARIANCE.P_A) I_V
+                                --Added for control WHT Tax Start updated on 06-Jun-2020
+                                ,SUM(AP_VARIANCE.INVOICE_AMOUNT)-SUM(AP_VARIANCE.PAYMENT_AMOUNT) FUN_INVOICE_VARIANCE
+                                --Added for control WHT Tax End on 06-Jun-2020
+                                
+                       FROM ( SELECT AIPA.INVOICE_ID,
+                                     SUM((NVL(AIPA.AMOUNT,0)*NVL(GDR.CONVERSION_RATE,1))) PAYMENT_AMOUNT,     
+                                     SUM(NVL(AIPA.AMOUNT_INV_CURR,AIPA.AMOUNT)) P_A,
+                                     --SUM(NVL(AIPA.AMOUNT,0)) P_A,
+                                     0.00 INVOICE_AMOUNT,
+                                     0.00 I_A
+                                FROM AP_INVOICE_PAYMENTS_ALL AIPA, AP_INVOICES_ALL AI, HR_OPERATING_UNITS HOU, GL_LEDGERS GLD, GL_DAILY_RATES GDR
+                                WHERE AIPA.POSTED_FLAG = 'Y'
+                                  AND AIPA.INVOICE_ID = AI.INVOICE_ID
+                                  AND AI.ORG_ID = HOU.ORGANIZATION_ID
+                                  AND HOU.SET_OF_BOOKS_ID = GLD.LEDGER_ID
+                                  AND GDR.CONVERSION_TYPE(+) = 'Corporate'
+                                  AND AIPA.PAYMENT_CURRENCY_CODE = GDR.FROM_CURRENCY(+)
+                                  AND GDR.TO_CURRENCY(+) = GLD.CURRENCY_CODE
+                                  AND TRUNC (conversion_date(+)) =   TRUNC (AI.INVOICE_DATE)
+                                  --AND  AI.INVOICE_ID IN(300000002757380)
+                                 AND TRUNC(AIPA.ACCOUNTING_DATE) <= :P_AS_OF_DATE--:P_AS_OF_DATE
+                              GROUP BY AIPA.INVOICE_ID
+                            UNION ALL
+                          SELECT AIDA.INVOICE_ID,
+                                 0.00 PAYMENT_AMOUNT,
+                                 0.00 P_A,
+                                 SUM(NVL(NVL(AIDA.BASE_AMOUNT,AIDA.AMOUNT),0)) INVOICE_AMOUNT,
+                                 SUM(NVL(AIDA.AMOUNT,0)) I_A
+                           FROM AP_INVOICE_DISTRIBUTIONS_ALL AIDA, AP_INVOICES_ALL AI
+                           WHERE AIDA.POSTED_FLAG = 'Y'
+                             AND TRUNC(AIDA.ACCOUNTING_DATE) <= :P_AS_OF_DATE--'2020-04-28'--:P_AS_OF_DATE
+                             AND AIDA.INVOICE_ID = AI.INVOICE_ID
+                          -- AND  AI.INVOICE_ID IN( 300000002757380)
+                             --and aida.line_type_lookup_code <> 'AWT'                     
+                            GROUP BY AIDA.INVOICE_ID,AI.Exchange_Rate
+                      ) AP_VARIANCE
+           GROUP BY  AP_VARIANCE.INVOICE_ID
+           HAVING (SUM(AP_VARIANCE.I_A)-SUM(AP_VARIANCE.P_A)) <>0.00
+) AU,
+
+Xla_Transaction_Entities XTE,
+  Xla_Ae_Headers XAH,
+  Xla_Ae_Lines XAL,
+  GL_Code_COmbinations GCC,
+  AP_INVOICES_ALL AIA,
+  HR_ALL_ORGANIZATION_UNITS_F    HAO,
+  HR_ORGANIZATION_UNITS_F_TL     HAOT,
+  AP_PAYMENT_SCHEDULES_ALL APSA,
+ POZ_SUPPLIERS_V POZ
+Where 1=1
+And XTE.Entity_Id=XAH.Entity_Id
+AND XTE.Ledger_Id=XAH.Ledger_Id
+And XAH.Ae_Header_Id=XAL.Ae_Header_Id
+And XAL.Code_Combination_Id=GCC.Code_Combination_Id
+And XTE.Entity_Code='AP_INVOICES'
+ANd XAH.GL_TRansfer_Status_COde='Y'
+And XAL.Accounting_Class_Code IN('LIABILITY')
+And XTE.Source_Id_Int_1=AIA.INVOICE_ID
+ANd XTE.Ledger_Id=AIA.Set_Of_Books_Id  
+  AND HAO.ORGANIZATION_ID      = HAOT.ORGANIZATION_ID
+  AND HAO.EFFECTIVE_START_DATE = HAOT.EFFECTIVE_START_DATE
+  AND HAO.EFFECTIVE_END_DATE   = HAOT.EFFECTIVE_END_DATE
+  AND TRUNC(SYSDATE) BETWEEN HAO.EFFECTIVE_START_DATE AND HAO.EFFECTIVE_END_DATE
+  AND HAOT.LANGUAGE  = 'US'
+  And HAOT.NAME= :P_BU
+ AND TRUNC(XAH.ACCOUNTING_DATE) <= :P_AS_OF_DATE
+ 
+ And APSA.INVOICE_ID = XTE.Source_Id_Int_1
+ AND AIA.INVOICE_ID = APSA.INVOICE_ID
+ AND AIA.VENDOR_ID = POZ.VENDOR_ID(+)
+ 
+ AND AU.INVOICE_ID = XTE.Source_Id_Int_1
+ AND AU.INVOICE_ID  = AIA.INVOICE_ID
+ 
+ 
+ 
+ And AIA.Invoice_ID In
+ 
+ (
+ Select Invoice_Id From (
+Select BUSINESS_UNIT,
+(Select Segment2 From GL_CODE_COMBINATIONS GCC WHere GCC.Code_Combination_Id=Liability_ID ) as Liability_Acct,
+(Select Segment1 From GL_CODE_COMBINATIONS GCC WHere GCC.Code_Combination_Id=Liability_ID ) as Company_Acct,
+(Select segment_name||'              :  '||fv.flex_value||'   '||fv.description as SEG_Company
+from
+fnd_flex_values_vl fv, fnd_id_flex_segments fs,GL_CODE_COMBINATIONS GCC
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Company Property'
+And fv.flex_value=GCC.Segment1
+And GCC.Code_Combination_Id=Liability_ID) as SEG_Company,
+
+(Select segment_name||'                               :  '||fv.flex_value||'   '||fv.description as SEG_Account
+from
+fnd_flex_values_vl fv, fnd_id_flex_segments fs,GL_CODE_COMBINATIONS GCC
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Account'
+And fv.flex_value=GCC.Segment2
+And GCC.Code_Combination_Id=Liability_ID) as SEG_Account,
+
+(Select segment_name||' :  '||fv.flex_value||'   '||fv.description as SEG_Trading_Company
+from
+fnd_flex_values_vl fv, fnd_id_flex_segments fs,GL_CODE_COMBINATIONS GCC
+where fs.flex_value_set_id = fv.flex_value_set_id
+and fs.application_id = 101
+and fs.id_flex_code = 'GL#'
+and segment_name = 'Trading Company Property'
+And fv.flex_value=GCC.Segment5
+And GCC.Code_Combination_Id=Liability_ID) as SEG_Trading_Company,
+
+ SUPPLIER_NAME,
+ Invoice_Currency_Code,
+ SUPPLIER_NUMBER,
+ SUPPLIER_TYPE,
+ INVOICE_NUM,
+ Pre_payment as Prepayments,
+ Payment_Term,
+ Description as Inv_Description,
+Retention_Amount  ,
+ Sum(INVOICE_PAYMENT_TOTAL) as INVOICE_PAYMENT_TOTAL,
+ Sum(FULL_INVOICE_AMOUNT) as FULL_INVOICE_AMOUNT,
+ Sum(REMAINING_AMOUNT) as REMAINING_AMOUNT,
+Sum(INVOICE_PAYMENT_TOTAL_USD) as INVOICE_PAYMENT_TOTAL_USD,
+Sum(FULL_INVOICE_AMOUNT_USD) as FULL_INVOICE_AMOUNT_USD,
+Sum(REMAINING_AMOUNT_USD) as REMAINING_AMOUNT_USD,
+Sum(PERCENTAGE_UPAID) as PERCENTAGE_UPAID
+,Sum(CUR_DAY) as  "CURRENT"
+,Sum(Bt_1) as "1_30_Days"
+,Sum(Bt_2)as "31_60_Days"
+,Sum(Bt_3) as "61_90_Days"
+,Sum(Bt_4) as Morethan90_Days
+,POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,Exchange_Rate_TPE,Invoice_Id
+From (
+Select  BUSINESS_UNIT, SUPPLIER_NAME,SUPPLIER_NUMBER,SUPPLIER_TYPE,INVOICE_NUM,INVOICE_PAYMENT_TOTAL,FULL_INVOICE_AMOUNT,REMAINING_AMOUNT,INVOICE_PAYMENT_TOTAL_USD,
+FULL_INVOICE_AMOUNT_USD,REMAINING_AMOUNT_USD,PERCENTAGE_UPAID,
+(Case When CUR_DAY !=0 Then
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End)
+Else 0 End) as CUR_DAY,
+(Case When Bt_1 !=0 Then 
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End)
+Else 0 End) as Bt_1,
+(Case When Bt_2 !=0 Then 
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End)
+Else 0 End) as Bt_2,
+(Case When Bt_3 !=0 Then
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End)
+Else 0 End) as Bt_3,
+(Case When Bt_4 !=0 Then
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End)
+Else 0 End) as Bt_4,
+POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,
+(Case When  row_number() over(partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM)=1 And ARK_INVOICE_PAYMENT_TOTAL>0 Then ARK_INVOICE_PAYMENT_TOTAL 
+Else
+sum(REMAINING_AMOUNT-nvl(ARK_INVOICE_PAYMENT_TOTAL,0)) over (partition by INVOICE_NUM,SUPPLIER_NAME,SUPPLIER_NUMBER order by INVOICE_NUM) 
+End) as Running_Total,Invoice_Currency_Code,Payment_Term,Description,Pre_payment,Liability_ID,Retention_Amount,Exchange_Rate_TPE,Invoice_Id
+
+From (
+SELECT  distinct  HAOT.NAME                      BUSINESS_UNIT,AIA.Invoice_Id,
+         NVL(POZ.VENDOR_NAME, (SELECT PARTY_NAME FROM HZ_PARTIES HP WHERE HP.PARTY_ID = AIA.PARTY_ID)) AS SUPPLIER_NAME,
+            POZ.SEGMENT1 AS SUPPLIER_NUMBER,
+           POZ.VENDOR_TYPE_LOOKUP_CODE AS SUPPLIER_TYPE,
+           AIA.INVOICE_NUM ,
+         -- TO_CHAR(APSA.DUE_DATE, 'MM-DD-YYYY') AS DUE_DATE,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then AU.PAYMENT_AMOUNT 
+         Else 0 End)AS INVOICE_PAYMENT_TOTAL,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then 
+         (Select Sum(Amount) From AP_INVOICE_PAYMENTS_ALL AIPA Where APSA.INVOICE_ID=AIPA.INVOICE_ID And APSA.Payment_Num=AIPA.Payment_Num And APSA.org_id=AIPA.org_id And TRUNC(AIPA.ACCOUNTING_DATE) <= '2019-09-30')
+         Else 0 End ) 
+          as ARK_INVOICE_PAYMENT_TOTAL,
+          (Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT') as WTH_TAX,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 
+         Then AU.INVOICE_AMOUNT + Nvl((Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT' ),0) 
+         Else 0 End)AS FULL_INVOICE_AMOUNT,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then
+         AU.INVOICE_VARIANCE 
+         Else 0 End ) 
+         AS REMAINING_AMOUNT,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then ROUND(AU.P_A*NVL(GDR.CONVERSION_RATE,1),2) 
+         Else 0 End)
+         AS INVOICE_PAYMENT_TOTAL_USD,
+	 (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 
+Then ROUND(AU.I_A,2) + Nvl((Select Abs(Nvl(Sum(Amount),0)) From Ap_Invoice_Lines_All Where Invoice_Id=APSA.Invoice_id And Line_Type_Lookup_Code='AWT' ),0) 
+ Else 0 End)AS FULL_INVOICE_AMOUNT_USD,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then ROUND(AU.I_A,2)  
+         Else 0 End)    AS REMAINING_AMOUNT_USD,
+          0 AS DUE_DAYS,
+         (Case When  row_number() over(partition by APSA.Invoice_id order by APSA.Invoice_id)=1 Then round((AU.I_V/(CASE AU.I_A WHEN 0 THEN 1 ELSE AU.I_A END))*100,2) 
+         Else 0 End)AS PERCENTAGE_UPAID,
+0 CUR_DAY,
+0 Bt_1,
+0 Bt_2,
+0 Bt_3,
+0 Bt_4 ,         
+  CASE AP_INVOICES_PKG.GET_POSTING_STATUS(AIA.INVOICE_ID) WHEN 'Y' THEN 'Posted' WHEN 'P' THEN 'Posted' ELSE 'Not Posted' END AS POSTED_FLAG,
+ CASE WHEN (CASE AP_INVOICES_PKG.GET_POSTING_STATUS(AIA.INVOICE_ID) WHEN 'Y' THEN 'Posted' WHEN 'P' THEN 'Posted' ELSE 'Not Posted' END = 'Posted') THEN to_char(AIA.GL_DATE, 'MM-DD-YYYY') ELSE NULL END AS POSTED_DATE,
+ TO_CHAR(AIA.INVOICE_DATE, 'MM-DD-YYYY') AS INVOICE_DATE,
+ TO_CHAR(AIA.CREATION_DATE, 'MM-DD-YYYY') AS CREATION_DATE  ,
+ (Case When  row_number() over(partition by APSA.Invoice_id,TRUNC(TO_DATE('09-30-2019','MM-DD-YYYY')) - TRUNC(TO_DATE(APSA.DUE_DATE)),AU.INVOICE_VARIANCE order by APSA.Invoice_id,AU.INVOICE_VARIANCE)=1 Then 'Y' Else 'N' End ) as Pick_Record_Flag
+ ,AIA.Invoice_Currency_Code
+ , (Select AT.Name From Ap_Terms_TL AT WHere AIA.Terms_Id=AT.Term_id And AT.Language='US' ANd Rownum=1)as Payment_Term
+ ,AIA.Description
+  ,0 as Pre_payment,AIA.ACCTS_PAY_CODE_COMBINATION_ID as Liability_ID 
+ ,0 as Retention_Amount
+,0 as Exchange_Rate_TPE,AIA.Exchange_Rate  as Exchange_Rate_TC
+
+             FROM    (  SELECT  AP_VARIANCE.INVOICE_ID,
+                                SUM(AP_VARIANCE.PAYMENT_AMOUNT) PAYMENT_AMOUNT,
+		                SUM(AP_VARIANCE.P_A) P_A,
+		                SUM(AP_VARIANCE.INVOICE_AMOUNT) INVOICE_AMOUNT,
+                                SUM(AP_VARIANCE.I_A) I_A,
+                                SUM(AP_VARIANCE.INVOICE_AMOUNT)-SUM(AP_VARIANCE.PAYMENT_AMOUNT) INVOICE_VARIANCE,
+                                SUM(AP_VARIANCE.I_A)-SUM(AP_VARIANCE.P_A) I_V
+                                --Added for control WHT Tax Start updated on 06-Jun-2020
+                                ,SUM(AP_VARIANCE.INVOICE_AMOUNT)-SUM(AP_VARIANCE.PAYMENT_AMOUNT) FUN_INVOICE_VARIANCE
+                                --Added for control WHT Tax End on 06-Jun-2020
+                                
+                       FROM ( SELECT AIPA.INVOICE_ID,
+                                     SUM((NVL(AIPA.AMOUNT,0)*NVL(GDR.CONVERSION_RATE,1))) PAYMENT_AMOUNT,     
+                                     SUM(NVL(AIPA.AMOUNT_INV_CURR,AIPA.AMOUNT)) P_A,
+                                     --SUM(NVL(AIPA.AMOUNT,0)) P_A,
+                                     0.00 INVOICE_AMOUNT,
+                                     0.00 I_A
+                                FROM AP_INVOICE_PAYMENTS_ALL AIPA, AP_INVOICES_ALL AI, HR_OPERATING_UNITS HOU, GL_LEDGERS GLD, GL_DAILY_RATES GDR
+                                WHERE AIPA.POSTED_FLAG = 'Y'
+                                  AND AIPA.INVOICE_ID = AI.INVOICE_ID
+                                  AND AI.ORG_ID = HOU.ORGANIZATION_ID
+                                  AND HOU.SET_OF_BOOKS_ID = GLD.LEDGER_ID
+                                  AND GDR.CONVERSION_TYPE(+) = 'Corporate'
+                                  AND AIPA.PAYMENT_CURRENCY_CODE = GDR.FROM_CURRENCY(+)
+                                  AND GDR.TO_CURRENCY(+) = GLD.CURRENCY_CODE
+                                  AND TRUNC (conversion_date(+)) =   TRUNC (AI.INVOICE_DATE)
+                                  --AND  AI.INVOICE_ID IN(300000002757380)
+                                 AND TRUNC(AIPA.ACCOUNTING_DATE) <= :P_AS_OF_DATE--:P_AS_OF_DATE
+                              GROUP BY AIPA.INVOICE_ID
+                            UNION ALL
+                          SELECT AIDA.INVOICE_ID,
+                                 0.00 PAYMENT_AMOUNT,
+                                 0.00 P_A,
+                                 SUM(NVL(NVL(AIDA.BASE_AMOUNT,AIDA.AMOUNT),0)) INVOICE_AMOUNT,
+                                 SUM(NVL(AIDA.AMOUNT,0)) I_A
+                           FROM AP_INVOICE_DISTRIBUTIONS_ALL AIDA, AP_INVOICES_ALL AI
+                           WHERE AIDA.POSTED_FLAG = 'Y'
+                             AND TRUNC(AIDA.ACCOUNTING_DATE) <= :P_AS_OF_DATE--'2020-04-28'--:P_AS_OF_DATE
+                             AND AIDA.INVOICE_ID = AI.INVOICE_ID
+                          -- AND  AI.INVOICE_ID IN( 300000002757380)
+                             --and aida.line_type_lookup_code <> 'AWT'                     
+                            GROUP BY AIDA.INVOICE_ID,AI.Exchange_Rate
+                      ) AP_VARIANCE
+           GROUP BY  AP_VARIANCE.INVOICE_ID
+           HAVING (SUM(AP_VARIANCE.I_A)-SUM(AP_VARIANCE.P_A)) <>0.00
+		   And  Sum(ROUND(Abs(AP_VARIANCE.I_A),2))>=Sum(ROUND(Abs(AP_VARIANCE.P_A),2)) 
+		   And Abs(SUM(AP_VARIANCE.I_A)-SUM(AP_VARIANCE.P_A))>=1
+		   Or Sum(ROUND(Abs(AP_VARIANCE.P_A),2))  =0
+) AU,
+ AP_INVOICES_ALL AIA,
+ AP_PAYMENT_SCHEDULES_ALL APSA,
+ POZ_SUPPLIERS_V POZ,
+ HR_ALL_ORGANIZATION_UNITS_F    HAO,
+ HR_ORGANIZATION_UNITS_F_TL     HAOT,
+  GL_DAILY_RATES  GDR
+WHERE AU.INVOICE_ID = AIA.INVOICE_ID
+--and aia.PAYMENT_STATUS_FLAG <> 'Y'
+ AND AU.INVOICE_ID = APSA.INVOICE_ID
+ AND AIA.VENDOR_ID = POZ.VENDOR_ID(+)
+  AND  AIA.ORG_ID              = HAO.ORGANIZATION_ID
+  AND HAO.ORGANIZATION_ID      = HAOT.ORGANIZATION_ID
+  AND HAO.EFFECTIVE_START_DATE = HAOT.EFFECTIVE_START_DATE
+  AND HAO.EFFECTIVE_END_DATE   = HAOT.EFFECTIVE_END_DATE
+  AND TRUNC(SYSDATE) BETWEEN HAO.EFFECTIVE_START_DATE AND HAO.EFFECTIVE_END_DATE
+  AND HAOT.LANGUAGE  = 'US'
+   AND AIA.INVOICE_CURRENCY_CODE = GDR.FROM_CURRENCY(+)
+   AND GDR.TO_CURRENCY(+) ='USD'   
+   AND GDR.CONVERSION_TYPE(+)='Corporate' 
+   AND GDR.CONVERSION_DATE(+) = AIA.INVOICE_DATE
+   --And AIA.Invoice_Num In('PUR-GB329901-0000000011_1')
+   And AIA.Legal_Entity_Id = (Select Legal_Entity_Id From XLE_ENTITY_PROFILES Where Name= :P_Legal_Entity And Rownum=1)
+   ANd AIA.INvoice_TYPE_Lookup_Code= Nvl(:P_Invoice_Type,AIA.INvoice_TYPE_Lookup_Code) --'CREDIT'
+ORDER BY  HAOT.NAME ,AIA.INVOICE_NUM ASC
+) INV Where Pick_Record_Flag='Y' Order By INVOICE_NUM,Due_Days
+) Where Business_Unit= :P_BU 
+And Supplier_Name= Nvl(:P_Supplier,Supplier_Name) --'BNH MEDICAL CENTRE LTD.'
+And Invoice_Currency_Code= Nvl(:P_Invoice_Currency_Code,Invoice_Currency_Code) --'THB'
+And Invoice_Num= Nvl(:P_Invoive_Number,Invoice_Num)
+Group By BUSINESS_UNIT, SUPPLIER_NAME,SUPPLIER_NUMBER,SUPPLIER_TYPE,INVOICE_NUM,POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,Invoice_Currency_Code
+,Payment_Term,Description,Pre_payment,Liability_ID,Retention_Amount,Exchange_Rate_TPE,Invoice_Id)
+
+ )
+ 
+)Group By Segment1 ,Segment2,Segment4,Segment5,Invoice_Num
+,BUSINESS_UNIT, SUPPLIER_NAME,SUPPLIER_NUMBER,SUPPLIER_TYPE
+,POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,Invoice_Currency_Code,Payment_Term,Description
+,CUR_DAY,Bt_1,Bt_2,Bt_3,Bt_4,Exchange_Rate_TPE,Exchange_Rate_TC
+)Group By BUSINESS_UNIT,Segment1 ,Segment2,Segment4,Segment5
+, SUPPLIER_NAME, Invoice_Currency_Code, SUPPLIER_NUMBER, SUPPLIER_TYPE, INVOICE_NUM,
+  Payment_Term, Description ,POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE,Exchange_Rate_TPE,Exchange_Rate_TC
+  Order By Segment1
+
+  )  Where  Liability_Acct Between nvl(:P_FROM_COA,Liability_Acct) And nvl(:P_TO_COA,Liability_Acct)
+	And Segment1 Between Nvl(:P_Company_From,Segment1) And Nvl(:P_Company_To,Segment1) 
+  
+  Group By BUSINESS_UNIT,Liability_Acct,GRP_Acct ,Company_Acct,SEG_Company,SEG_Account,SEG_Trading_Company,Segment1 ,Segment2,Segment5
+, SUPPLIER_NAME, Invoice_Currency_Code, SUPPLIER_NUMBER, SUPPLIER_TYPE, INVOICE_NUM, Payment_Term, Inv_Description
+, POSTED_FLAG,POSTED_DATE,INVOICE_DATE,CREATION_DATE
+Order By  INVOICE_NUM
+) Group By BUSINESS_UNIT

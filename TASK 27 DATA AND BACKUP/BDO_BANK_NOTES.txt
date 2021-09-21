@@ -1,0 +1,37 @@
+Type of Remittance->2
+Amount->OutboundPayment/PaymentAmount/Value -> 35.12
+Source Account->BankAccount/BankAccountNumber -> 012538000039
+First Name->blank
+Middle Name->blank
+Beneficiary Name->OutboundPayment/SupplierorParty/Name -> COCINA DE LA ABUELAS CORPORATION
+Beneficiary Address->OutboundPayment/SupplierorParty/Address/AddressLine1 -> 2F SOMERSET MILLENIUM MAKATI
+Beneficiary City ->OutboundPayment/SupplierorParty/Address/City -> Makati City
+Beneficiary Country ->OutboundPayment/SupplierorParty/Address/Country -> PH
+Beneficiary Account Number-> OutboundPayment/PayeeBankAccount/BankAccountNumber -> 101500000448
+Beneficiary Bank-> OutboundPayment/PayeeBankAccount/BankNumber -> CHBC01
+Beneficiary Bank Address -> OutboundPayment/PayeeBankAccount/BankAddress/CountryName -> Philippines
+Beneficiary Information -> blank
+Charge Type -> 0
+Bank to Bank Information -> blank
+Date Established -> 
+Place of Incorporation
+Nationality
+Nature of Business
+Is Corporation -> 1
+Beneficiary Currency Code -> PHP
+Purpose Code
+Nature of Transfer
+Swift Code
+Country of Destination
+Importers Code
+Routing Number
+==============================
+TEMPLATE VIEWER OUTPUT:
+----------------------
+2	35.12	012538000039			COCINA DE LA ABUELAS CORPORATION	2F SOMERSET MILLENIUM MAKATI	MAKATI CITY	PH	101500000448	CHBC01	PHILIPPINES		0						1	PHP						
+2	67.46	012538000039			LGS STAFF MANAGEMENT SERVICES INCORPORATED	1639 P.E.S. BUILDING DIAN ST.	MAKATI CITY	PH	2012900001169	UCPB01	PHILIPPINES		0						1	PHP						
+
+
+
+
+

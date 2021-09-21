@@ -1,0 +1,115 @@
+CONCEPTS AND LOGICS:
+
+Invoice:
+       Received from supplier for purchased goods.
+
+Types of Invoice:
+1.Standard
+2.prepayment
+3.credit memo
+4.debit memo
+5.Withholding tax
+
+Matching Approvals:
+1.Two way : po and invoice
+2.Three way : po,invoice,receipt
+3.Four way : po,invoice,receipt,supplier acknowledgment
+
+Void: Reverse the accounting and payment records.Status of paid invoice reset to unpaid.
+
+Invoice actions:
+1.None : payment will canceled and Invoice will open for payment again.
+2.Hold : payment will canceled and invoice in hold state.
+3.Cancel :both payment and invoice will canceled.
+
+Hold : Hold the payment to pay.
+
+Validation of invoice:
+*Auto hold to exception invoice.
+Cancel invoive : Cancel only unpaid,invalidated invoice,
+not have any payment or accounting holds.
+Delete invoice : delete when invoice does not match with PO and line should not created.
+
+Accounts type:
+1.Assets
+2.Liability
+3.Equity
+4.Expense
+5.Revenue
+
+Prepayment:
+          *Making an advance payment to a supplier for goods and services.
+          *It is type of invoice apply to outstanding amount to reduce the invoice amount.
+Prepayment types:
+          *Temporary(catering hotel deposite-depends on invoice).
+          *Permanent(lease deposite-doesn't depends on invoice).
+Invoice Corrections:
+      Difference between orginal price,quantity or amount and new price,quantity or amount.
+          *price correction:
+          *Quantity correction:
+Payment terms:Used to create invoice installments.
+
+Installments:Splitting payment for invoice.
+
+Types of holds:
+1.Invoice holds
+2.Installment holds
+3.Supplier site holds
+4.System holds
+
+P2P:
+purchasing a product and making payment for that product to supplier is called procure to pay process.
+
+Flow from invoice to GL:
+Regarding AP invoice flow and posting to GL, there are two different steps:
+
+1) Create and Validate transaction (part of transactional model)
+
+2) Create accounting and posting to GL (accounting model)
+
+1) Create and Validate transaction
+
+      a. complete invoice data at header, lines and distributions (from manual, import, PO or other source)
+
+      b. check if tax is applicable and calculate the tax
+
+      c. check budget funds if budgetary control is applicable
+
+      d. validate the invoice
+
+Once the invoice has been validated, you cannot delete it.
+
+2) Create accounting and posting to GL
+
+There are three distinct process here:
+
+  a. Create accounting (will create accounting model for transaction in SLA)
+
+  b. Transfer to GL  (accounting entries will be transferred to GL)
+
+  c. Post to GL  (payables journals created in GL will post to GL balance)
+
+You have two ways for accounting model:
+
+- Online (from Invoice actions)
+
+        - Account in Draft (will create only accounting -step a, in Draft mode)
+
+        - Post to GL (will execute all steps a, b, c: accounting , transfer and post to GL)
+
+- using Create Accounting process (you can choose which exactly steps you need: only a, only a and b or all)
+
+If you create accounting entries, but not transfer to GL, you should use separate process to transfer accounting entries to GL: Post Subledger Journal Entries.
+
+Accounting Date = Accounting Date or GL Date of the invoice represent the date in which you want to book the accounting of the invoice.
+
+The accounting date is based on the transaction date for the transactions entered.
+
+GL Transfer Date = Date when invoice journal entries(reporting to auditing) are transferred to GL.
+
+GL Posting Date = Date when journal entries transferred to GL are posted in GL balance.
+
+
+
+
+

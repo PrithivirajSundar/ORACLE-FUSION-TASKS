@@ -1,0 +1,46 @@
+Product Code --> PLC
+Debit Account Country Code (Payer/Address/Country) --> PH
+Debit Account Number (BankAccount/IBANNumber) --> nodata
+Payment Currency (BankAccount/BankAccountCurrency/Code) --> PHP
+Payment Amount (format-number(LogicalGrouping/PaymentInformationAmountTotal, '##0.00')) --> nodata
+Transaction Reference Number ($instrid)(PaymentInstructionInfo/InstructionReferenceNumber) --> 13023
+Ordering Party Name (Payer/Name) --> Scotts Philippines, Inc.
+Beneficiary Name (substring(SupplierorParty/Name, 0, 35)) --> DHL EXPRESS (PHILIPPINES) CORP.
+Mail To Name --> (substring(SupplierorParty/Name, 0, 35)) --> DHL EXPRESS (PHILIPPINES) CORP.
+Mail To Address 1 --> (substring(SupplierorParty/Address/AddressLine1, 0, 50)) --> 2306 Chino roces Ave.,
+Mail To Address 2 --> (substring(SupplierorParty/Address/City, 0, 10)) --> Makati City
+Mail To Address 3 --> (substring(SupplierorParty/Address/PostalCode, 0, 8)) --> 1227
+Mail To Address 4 --> (SupplierorParty/Address/Country) --> PH
+Delivery Method --> EMAILPDF
+==============================
+invoice detail line 
+payment date -->
+bene name --> (substring(SupplierorParty/Name, 0, 35)) --> DHL EXPRESS (PHILIPPINES) CORP.
+Bene Tax ID (12) --> payee/taxregistrationnumber --> no data
+Address Line1 (70) --> substring(SupplierorParty/Address/AddressLine1, 0, 50) --> 2306 Chino roces Ave.,
+Address Line 2 (70) --> substring(SupplierorParty/Address/PostalCode, 0, 8),substring(SupplierorParty/Address/City, 0, 10)--> 1227 Makati City
+Foreign Print Address Line 1 (70)
+Foreign Print Address Line 2 (70)
+Local Post Code (10)
+ATC Code1 (10) --> tax/taxpayercode --> STDS1
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment1  (9(15)V99)
+ATC Code 2 (10)
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment 2 (9(15)V99)
+ATC Code 3(10)
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment1  (9(15)V99)
+Amount of Income payment 2 (9(15)V99)
+Grand Total Amount of Income Payment (9(15)V99)
+Payor Name (70) --> Payer/Name --> Scotts Philippines, Inc.
+Payor TIN ID (12) --> OutboundPaymentInstruction/InstructionGrouping/Payer/LegalEntityRegistrationNumber --> AS095-008251
+Address Line 1 (70) --> Payer/Address/AddressLine1 --> Basement 3, Glorietta 4, Ayala Avenue
+Address Line 2 (70) --> Payer/Address/PostalCode,Payer/Address/City --> 1224 Makati
+Local Post Code (10)
+Authorized Representative's Name
+Authorized Representative's TIN
+Authorized Representative's position
+

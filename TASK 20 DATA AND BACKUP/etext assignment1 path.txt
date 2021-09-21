@@ -1,0 +1,19 @@
+BankAccount/BankAddress/Country --> MY
+BankAccount/BankAccountNumber ----> 111111111
+PaymentAmount/Currency/Code ------> MYR
+PaymentAmount/Value --------------> 16064.04
+PaymentDate ----------------------> 2021-07-12
+PaymentNumber/CheckNumber --------> 10002
+PayeeBankAccount/BankAccountName -> SYNTECH CHEMICALS PTE LTD
+SupplierorParty/Address/AddressLine1 -> 2A SECOND CHIN BEE ROAD
+PayeeBankAccount/BankAccountNumber ---> 0020253704
+PayeeBankAccount/BankName ---------> DBS BANK LTD
+PayeeBankAccount/BranchNumber --------> 003
+SupplierorParty/Name ----------------------> SYNTECH CHEMICALS PTE LTD
+Payee/RemitAdviceEmail ---------------> enquiry.sgpayments@the-ascott.com
+DocumentNumber/ReferenceNumber -------> VV12301
+DocumentDate -------------------------> 2021-06-28
+TotalDocumentAmount/Value ------------> 788.67
+TotalDocumentAmount/Currency/Code ----> MYR
+PaymentAmount/Value ------------------> 16064.04
+PaymentAmount/Currency/Code ----------> MYR

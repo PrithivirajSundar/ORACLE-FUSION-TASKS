@@ -1,0 +1,44 @@
+DOUBT QUESTIONS:
+1.joins for all columns?
+2.pick record flag?
+3.user conversion type -> tal period type why?
+4.:p_aging_type -> which table?
+
+
+TECHNICAL QUESTIONS:
+INVOICE CONDITIONS:
+
+payment post flag = Y
+distribution post flag = Y
+conversion type = corporate
+payment accounting date <= as of date
+distribution accounting date <= as of date
+
+
+line type -> awt
+AP_INVOICES_PKG.GET_POSTING_STATUS(invoice_id) -> to identify posting status for a invoice id.
+ap_terms_tl -> language(US)-> payment term(net 30,net 60..)
+
+segment 1 -> company acct
+segment 2 -> liability acct
+segment 5 -> company acct
+
+INVOICE TYPES:
+1.CREDIT: A credit invoice, also called a credit memo, is issued by a business that needs to provide a client with a discount or a refund, or to correct a previous invoicing error. 
+2.STANDARD: This is the most common form of invoice
+3.PREPAYMENT:Type of invoice you enter to pay an advance payment for to a supplier or employee
+
+RECEIPT TYPES:
+1.Standard receipts: Payment (such as cash or a check) that you receive from your customers for goods or services. Also known as cash receipts.
+2.Miscellaneous receipts: Revenue earned from investments, interest, refunds, stock sales, and other nonstandard items.
+
+ACCOUNTING DATE/GL ACCOUNTING DATE:
+If set "Summarize by General Ledger Period" value in Manage Subledger Accounting Options task,System set last day of the period to the GL accounting date.
+(If AP accounting date is "20/Aug/2016",GL accounting date is set as "31/Aug/2016")
+
+And if set "Summarize by General Ledger Date" value in Manage Subledger Accounting Options task,AP accounting date should be equal to accounting date in GL.
+
+So,If you need to set accounting date in AP is equal to accounting date in GL after post to ledger
+
+VOID:
+TRANSACTION TYPE -> VOID AND POSTED FLAG -> SET TO NO.

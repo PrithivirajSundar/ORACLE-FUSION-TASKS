@@ -1,0 +1,89 @@
+SAMPLE OUTPUT
+=============
+
+HH1561307.001H156                
+P13/07/2016                    R0000400000000000000160.0010129               
+IN10000          ABC LIMITED                                  #81, 12TH CROSS, 10TH MAIN, KORAMANGLA, BENGALORE, KARNATAKA, IN, 560082560082                                                                                                                                                                       ABC LIMITED                                                                     63861000000016213/07/201600000000000000001.00ABC LIMITED         INR                 199                                     13/07/201600001          SBIN0005778010STATE BANK OF INDIA                                                   1234567890               M.G ROAD                                                                        MADHU@GMAIL.COM                                   
+IN10000          ABC LIMITED                                  #81, 12TH CROSS, 10TH MAIN, KORAMANGLA, BENGALORE, KARNATAKA, IN, 560082560082                                                                                                                                                                       ABC LIMITED                                                                     63861000000016313/07/201600000000000000006.00ABC LIMITED         INR                 200                                     13/07/201600001          SBIN0005778010STATE BANK OF INDIA                                                   1234567890               M.G ROAD                                                                        MADHU@GMAIL.COM                                   
+IN10000          ABC LIMITED                                  #81, 12TH CROSS, 10TH MAIN, KORAMANGLA, BENGALORE, KARNATAKA, IN, 560082560082                                                                                                                                                                       ABC LIMITED                                                                     63861000000016413/07/201600000000000000067.00ABC LIMITED         INR                 201                                     13/07/201600001          SBIN0005778010STATE BANK OF INDIA                                                   1234567890               M.G ROAD                                                                        MADHU@GMAIL.COM                                   
+IN10000          ABC LIMITED                                  #81, 12TH CROSS, 10TH MAIN, KORAMANGLA, BENGALORE, KARNATAKA, IN, 560082560082                                                                                                                                                                       ABC LIMITED                                                                     63861000000016513/07/201600000000000000086.00ABC LIMITED         INR                 202                                     13/07/201600003          SBIN0005778010STATE BANK OF INDIA                                                   1234567890               M.G ROAD                                                                        MADHU@GMAIL.COM                                   
+A199                                     13/07/2016D00001INVOICE NUMBER:1987,INVOICE DATE: 30-MAY-16,INVOICE AMOUNT: 300000                                                                                                        
+A200                                     13/07/2016D00001INVOICE NUMBER:H2H-R,INVOICE DATE: 15-JUN-16,INVOICE AMOUNT: 70000000                                                                                                     
+A201                                     13/07/2016D00001INVOICE NUMBER:H2H-N,INVOICE DATE: 15-JUN-16,INVOICE AMOUNT: 50000000                                                                                                     
+A202                                     13/07/2016D00001INVOICE NUMBER:H2H-1,INVOICE DATE: 15-JUN-16,INVOICE AMOUNT: 700000000                                                                                                    
+A202                                     13/07/2016D00002INVOICE NUMBER:H2H-TEST-2,INVOICE DATE: 15-JUN-16,INVOICE AMOUNT: 1000000000                                                                                              
+A202                                     13/07/2016D00003INVOICE NUMBER:H2H-TEST-3,INVOICE DATE: 15-JUN-16,INVOICE AMOUNT: 1200000000                                                                                              
+T0000400000000000000160.00
+
+TEMPLATE VIEWER OUTPUT
+======================
+
+H662H2402.001662H                
+P24/02/2021                    R0000200000000000001068.0063007               
+IN20000428       INK STATION                                  22, Main Road FC Road PuneMaharashtra411043                                                                                                                     AXIS BANK LTD                                                                        Ink Station Corporation                                                         10000004       24/02/202100000000000000830.00                    INR                 10000004                                24/02/202100002          UTIB0000037011AXIS BANK LTD                                                         00040330018662           PUNE FC ROAD                                                                    SALES@INKSTATION.COM                              
+A10000004                                24/02/2021D00001INVOICE NUMBER:IN_Dom_Inv_20000,INVOICE DATE:2021-02-06,INVOICE AMOUNT:30000 INR,PAYMENT AMOUNT:260 INR                                                                   
+A10000004                                24/02/2021D00001INVOICE NUMBER:IN_Dttc_200300,INVOICE DATE:2021-02-06,INVOICE AMOUNT:59939 INR,PAYMENT AMOUNT:570 INR                                                                     
+IN20003237       CORPORATE SOLUTIONS REDEFINED INDIA PVT LTD  123 Marina Road  ChennaiTamil Nadu342344                                                                                                                        ICICI BANK LIMITED                                                                   COR SOL REDEFINED INDIA                                                         10000005       24/02/202100000000000000238.00                    INR                 10000005                                24/02/202100001          ICICI12345 011ICICI BANK LIMITED                                                    00040330018662           MUMBAI                                                                          CONTACT@CSRIPL.COM                                
+A10000005                                24/02/2021D00001INVOICE NUMBER:IN_INR20000,INVOICE DATE:2021-02-06,INVOICE AMOUNT:26000 INR,PAYMENT AMOUNT:238 INR                                                                        
+T0000200000000000001068.00
+
+
+
+BankAccount/BankAccountSuffix --> 662H
+DDMM
+TAL_IN_HDFC_NEFT_SEQ
+PaymentInstructionInfo/InstructionCreationDate --> 24/02/2021
+InstructionTotals/PaymentCount --> 2
+InstructionTotals/TotalPaymentAmount/Value --> 1068
+PaymentInstructionInfo/InstructionReferenceNumber --> 63007
+OutboundPayment/PaymentMethod/PaymentMethodInternalID --> DFT    If NEFT --> N   elseIf IFT --> I
+OutboundPayment/SupplierorParty/SupplierNumber --> 20000428
+OutboundPayment/SupplierorParty/Name --> INK STATION
+OutboundPayment/SupplierorParty/Address/AddressLine1 --> 22, Main Road
+										AddressLine2 --> FC Road
+										AddressLine3 --> ________
+										City --> Pune
+										State --> Maharashtra
+										PostalCode --> 411043
+								
+OutboundPayment/PayeeBankAccount/BankName --> AXIS BANK LTD
+OutboundPayment/PayeeBankAccount/BankAccountNumber --> 23452345
+OutboundPayment/PayeeBankAccount/BankAccountName --> Ink Station Corporation
+OutboundPayment/PaymentNumber/CheckNumber --> 10000004
+OutboundPayment/PaymentDate --> 2021-02-24
+OutboundPayment/PaymentAmount/Value --> 830
+PaymentAmount/Currency/Code --> INR
+OutboundPayment/PaymentNumber/CheckNumber --> 10000004
+OutboundPayment/PaymentDate --> 2021-02-24
+OutboundPayment/PayeeBankAccount/BranchNumber --> UTIB0000037
+OutboundPayment/PayeeBankAccount/BankName --> AXIS BANK LTD
+OutboundPayment/BankAccount/BankAccountNumber --> 00040330018662
+PayeeBankAccount/BranchName --> Pune FC Road
+PayeeBankAccount/BankAddress/City --> 
+Payee/RemitAdviceDeliveryMethod --> EMAIL
+Payee/RemitAdviceEmail --> Sales@INKSTATION.COM
+
+OutboundPayment/PaymentNumber/CheckNumber --> 10000004
+OutboundPayment/PaymentDate --> 2021-02-24
+DocumentNumber/ReferenceNumber --> IN_Dom_Inv_20000
+DocumentDate --> 2021-02-06
+TotalDocumentAmount/Value --> 30000
+TotalDocumentAmount/Currency/Code --> INR
+PaymentAmount/Value --> 830
+PaymentAmount/Currency/Code --> INR
+
+InstructionTotals/PaymentCount --> 2
+InstructionTotals/TotalPaymentAmount/Value --> 1068
+
+
+
+File Name
+Transaction Type
+Number of Records in Annexure Text
+Bene A/c type
+
+	
+
+
+
+

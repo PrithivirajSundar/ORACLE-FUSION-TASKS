@@ -1,0 +1,150 @@
+AP_INVOICE_PAYMENTS_ALL AIPA
+============================
+INVOICE_ID
+AMOUNT
+AMOUNT_INV_CURR
+ACCOUNTING_DATE**
+PAYMENT_CURRENCY_CODE**
+POSTED_FLAG**
+
+GL_LEDGERS GLD (join)
+===========
+LEDGER_ID
+CURRENCY_CODE
+
+GL_DAILY_RATES GDR
+===================
+CONVERSION_RATE
+TO_CURRENCY**
+CONVERSION_TYPE**
+FROM_CURRENCY**
+
+AP_INVOICE_DISTRIBUTIONS_ALL AIDA
+================================
+BASE_AMOUNT
+AMOUNT
+ACCOUNTING_DATE
+POSTED_FLAG**
+
+AP_INVOICES_ALL AI
+==================
+INVOICE_NUM
+Invoice_Id
+INVOICE_DATE
+CREATION_DATE
+Exchange_Rate
+GL_DATE
+Description
+VENDOR_ID**
+ORG_ID**
+
+AP_PAYMENT_SCHEDULES_ALL 
+==========================
+Invoice_id
+DUE_DATE
+org_id**
+
+AP_INVOICE_DISTRIBUTIONS_ALL IDA/ADA/AIDA
+=========================================
+LINE_TYPE_LOOKUP_CODE
+Invoice_Id
+Dist_Code_Combination_ID
+Amount
+POSTED_FLAG
+
+POZ_SUPPLIERS_V 
+=====================
+VENDOR_NAME
+SEGMENT1
+VENDOR_TYPE_LOOKUP_CODE
+
+*** Joins table and columns ***
+---------------------------------
+HR_OPERATING_UNITS HOU
+===============================
+SET_OF_BOOKS_ID
+ORGANIZATION_ID
+
+HR_ALL_ORGANIZATION_UNITS_F
+===============================   
+EFFECTIVE_START_DATE
+EFFECTIVE_END_DATE
+ 
+HR_ORGANIZATION_UNITS_F_TL 
+=============================    
+NAME
+EFFECTIVE_START_DATE
+EFFECTIVE_END_DATE
+LANGUAGE
+
+Ap_Terms_TL
+===============
+Name----->Payment Term
+
+
+Xla_Transaction_Entities XTE
+================================
+Ledger_Id
+Entity_Id
+Entity_Code
+
+Xla_Ae_Headers XAH
+==========================
+Ledger_Id
+Entity_Id
+Ae_Header_Id
+GL_TRansfer_Status_COde
+
+Xla_Ae_Lines XAL
+=========================
+Ae_Header_Id
+Code_Combination_Id
+Accounting_Class_Code IN('LIABILITY')
+Accounted_DR
+Accounted_CR
+Entered_CR
+Entered_DR
+
+GL_Code_COmbinations GCC
+=========================
+Code_Combination_Id
+Liability_ID
+
+gl_daily_conversion_types
+==========================
+Conversion_Type
+User_Conversion_Type
+
+gl_daily_rates
+=========================
+Conversion_Type
+From_Currency
+TO_Currency
+
+fnd_flex_values_vl fv
+========================
+flex_value_set_id
+flex_value
+Segment2
+description
+
+fnd_id_flex_segments fs
+========================
+id_flex_code
+flex_value_set_id
+application_id
+
+Subquery
+==========
+HZ_PARTIES HP
+===============
+PARTY_ID
+PARTY_NAME
+
+Package
+===============
+AP_INVOICES_PKG
+
+Function/procedure
+==================
+GET_POSTING_STATUS

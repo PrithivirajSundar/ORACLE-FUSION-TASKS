@@ -1,0 +1,8 @@
+0                 01          SCOTTS PHILIPPINES, INC.  075603            180820                                        
+1CITI01-100000515   892.5     
+DHL EXPRESS (PHILIPPINES) CORP. MNLR001970        CITIBAN         DHL EXPRESS (PHI105.00  
+7CITI01-            5628.22                                               2                                             
+0                 01          SCOTTS PHILIPPINES, INC.  075603            180820                                        
+1CITI01-100000764   4735.72   
+GLOBE TELECOM                   1071384740        CITIBAN         GLOBE TELECOM   557.14  
+7CITI01-            5628.22                                               2                                             
